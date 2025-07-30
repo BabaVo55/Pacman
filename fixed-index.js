@@ -540,6 +540,23 @@ function animate() {
             })
         }
     }
+
+    for (let i = ghosts.length - 1; i >= 0; i--){
+        let ghost = ghosts[i]
+        if (Math.hypot(
+            ghost.position.x - player.position.x, 
+            ghost.position.y - player.position.y
+      ) < ghost.radius + player.radius){
+          if (ghost.scared){
+            ghosts.splice(i, 1)
+        }else {
+          
+        cancelAnimationFrame(animationId)
+          result.innerHTML = 'You Loose Bruh'
+        }
+      }
+
+    }
     // Second way of Fixing FLASHING
     for (let i = pellets.length - 1; i >= 0; i--){
       const pellet = pellets[i]
