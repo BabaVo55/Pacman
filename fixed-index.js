@@ -50,7 +50,15 @@ class Player {
         c.closePath();
     }
     update(){
- 
+        //Experimental feature
+        // window.addEventListener('keydown', ({key}) => {
+        //     switch (key){
+        //         case 's':
+        //             this.radians = 0.5
+        //         break
+
+        //     }
+        // })
         this.draw()
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
