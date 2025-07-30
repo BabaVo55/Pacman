@@ -37,11 +37,14 @@ class Player {
         this.position = position;
         this.velocity = velocity;
         this.radius = 15;
+        this.radians = 0.75 
+        this.interval = 0.25
         
     }
     draw(){
         c.beginPath();
-        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.arc(this.position.x, this.position.y, this.radius, this.radians, Math.PI * 2 - this.radians)
+        c.lineTo(this.position.x, this.position.y)
         c.fillStyle = 'yellow';
         c.fill()
         c.closePath();
@@ -51,6 +54,12 @@ class Player {
         this.draw()
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
+
+       if (this.radians < 0 || this.radians > 0.75){
+            this.interval = -this.interval
+        }
+        this.radians += this.interval
+
 
     }
     
@@ -81,7 +90,7 @@ class Ghost {
         // if (this.scared){
         //     this.color = 'blue';
         // }
- 
+
         this.draw()
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
@@ -554,9 +563,10 @@ function animate() {
             result.innerHTML = 'You Loose Bruh'
         }
     }
-    if (ghosts.length === 0){
+    if (ghosts.length === 0 || pellets.length === 0){
             result.innerHTML = "You Win!"
             console.log(ghosts)
+            ghosts.pop() * ghosts.length + 1
     }
 
     }
