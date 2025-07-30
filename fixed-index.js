@@ -65,16 +65,22 @@ class Ghost {
         this.color = color;
         this.prevCollisions = [];
         this.speed = 2
-        
+        this.scared = false;
     }
+    
+
+
     draw(){
         c.beginPath();
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
-        c.fillStyle = this.color;
+        c.fillStyle = this.scared ? 'blue' : this.color;
         c.fill()
         c.closePath();
     }
     update(){
+        // if (this.scared){
+        //     this.color = 'blue';
+        // }
  
         this.draw()
         this.position.x += this.velocity.x;
@@ -102,6 +108,20 @@ class Pellet {
       c.closePath()
     }
 }    
+class PowerUp {
+    constructor({ position }) {
+      this.position = position
+      this.radius = 8
+    }
+
+    draw(){
+      c.beginPath();
+      c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+      c.fillStyle = 'white';
+      c.fill();
+      c.closePath()
+    }
+}    
 
 
 let player = new Player({
@@ -119,6 +139,9 @@ let player = new Player({
 
 const boundaries = [];
 const pellets = [];
+const powerUps = [];
+
+
 const ghosts = [
   new Ghost({
     position : {
@@ -371,16 +394,26 @@ map.forEach((row, i) => {
             }
           })
         )
-      
+        break
+    case 'p':
+        powerUps.push(
+            new PowerUp({
+                position: {
+                    x: j * Boundary.width + Boundary.width / 2,
+                    y: i * Boundary.height + Boundary.height / 2
+                }
+            })
+        )
+        break;
     }
   })
 })
 
 
-let keyHistory = [];
+// let keyHistory = [];
 
-let lastKey = keyHistory[keyHistory.length - 1];
-
+// let lastKey = keyHistory[keyHistory.length - 1];
+console.log(powerUps)
 
 function cirlceCollidesWithRectangle({circle, rectangle}) {
   const padding = (Boundary.width / 2) - circle.radius - 1
@@ -390,13 +423,13 @@ function cirlceCollidesWithRectangle({circle, rectangle}) {
             && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding // circle left && rectangle right
 }
 
-
 let animationId;
 function animate() {
   // console.log(keyHistory)
     animationId = requestAnimationFrame(animate);
     // console.log(animationId)    
-
+    // console.log(powerUps)
+    
     c.clearRect(0, 0, canvas.width, canvas.height)
     if (keys.w.pressed && lastKey === 'w') {
         for (let i = 0; i < boundaries.length; i++) {
@@ -488,6 +521,25 @@ function animate() {
         player.velocity.y = 0;
     }
     
+    for (let j = powerUps.length - 1; j >= 0; j--){
+        const powerUp = powerUps[j];
+        console.log()
+        
+        powerUp.draw()
+        if (Math.hypot(
+            player.position.x - powerUp.position.x,
+            player.position.y - powerUp.position.y) < player.radius - powerUp.radius
+        ){
+            powerUps.splice(j, 1);
+            ghosts.forEach(ghost => {
+                ghost.scared = true
+                setTimeout(() => {
+                    ghost.scared = false
+
+                }, 5000)
+            })
+        }
+    }
     // Second way of Fixing FLASHING
     for (let i = pellets.length - 1; i >= 0; i--){
       const pellet = pellets[i]
@@ -532,7 +584,7 @@ function animate() {
         ghost.position.x - player.position.x, 
         ghost.position.y - player.position.y
       ) < 
-        ghost.radius + player.radius){
+        ghost.radius + player.radius && !ghost.scared){
           cancelAnimationFrame(animationId)
           result.innerHTML = 'You Loose Bruh'
       }
@@ -597,7 +649,7 @@ function animate() {
         if (ghost.velocity.x > 0 ) ghost.prevCollisions.push('right')
         else if (ghost.velocity.x < 0 ) ghost.prevCollisions.push('left')
         else if (ghost.velocity.y > 0 ) ghost.prevCollisions.push('up')
-        else if (ghost.velocity.y > 0 ) ghost.prevCollisions.push('down')
+        else if (ghost.velocity.y < 0 ) ghost.prevCollisions.push('down')
 
         // console.log(collisions)
         // console.log(ghost.prevCollisions)
